@@ -1,0 +1,34 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "FITSCore",
+        "repositoryURL": "https://github.com/brampf/fitscore.git",
+        "state": {
+          "branch": "fitskit-advanced",
+          "revision": "9a8aa585200b8522346e261909694f1e39f96f66",
+          "version": null
+        }
+      },
+      {
+        "package": "FITSKit",
+        "repositoryURL": "https://gitlab.com/alim31/fitskit_RGBonly.git",
+        "state": {
+          "branch": "advanced",
+          "revision": "20c4e4dc43a3d34e8f2a344d4f7592bfb41b433b",
+          "version": null
+        }
+      },
+      {
+        "package": "swift-numerics",
+        "repositoryURL": "https://github.com/apple/swift-numerics",
+        "state": {
+          "branch": null,
+          "revision": "6583ac70c326c3ee080c1d42d9ca3361dca816cd",
+          "version": "0.1.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
