@@ -13,10 +13,9 @@ import Accelerate.vImage
 import Combine
 
 struct ContentView: View {
-    @State private var selectNewImage = false
-    
 
     
+
     var path = "file:///Users/anthonylim/Downloads/2020-12-03_19;56;17.fits"
     let path1 = "file:///Users/anthonylim/Downloads/2020-12-03_19;56;17.fits"
     let path2 = "file:///Users/anthonylim/Downloads/n5194.fits"
@@ -27,12 +26,14 @@ struct ContentView: View {
     let path7 = "file:///Users/anthonylim/Downloads/NGC4438-104275-LUM.fit"
     let path8 = "file:///Users/anthonylim/Downloads/M66-ID10979-OC144423-GR4135-LUM2.fit"
     let path9 = "file:///Users/anthonylim/Downloads/NGC6960-ID14567-OC148925-GR8123-LUM.fit"
-    var data = Data()
+    let histogramcount = 1024
+    
     func read() -> ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat){
         var threeData: ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat)?
         var path = URL(string: path7)!
         var read_data = try! FitsFile.read(contentsOf: path)
         let prime = read_data?.prime
+        print(prime)
         prime?.v_complete(onError: {_ in
             print("CGImage creation error")
         }) { result in
@@ -40,7 +41,7 @@ struct ContentView: View {
         }
         return threeData!
     }
-    func display() -> CGImage{
+    func display() -> (CGImage, [vImagePixelCount]){
         let threedata = read()
         var data = threedata.0
         //target data
@@ -55,32 +56,12 @@ struct ContentView: View {
 
         var dataMin = data.min()// data type FITSByte_F
         var dataAvg = data.mean
-        /*
-        let kernel1D: [Float] = [0, 45, 136, 181, 136, 45, 0]
-        var bendValue = Float(0.0)
-        if dataAvg * 2.0 > 1.0 {
-            bendValue = (1.0 - dataAvg)/2 + dataAvg
-        }
-        else
-        {
-            bendValue = 1.5 * dataAvg
-        }
-        for i in 0 ..< retdta.count{
-            retdta[i] = (dataAvg * (retdta[i] / (data[i] + bendValue)) + 100.0 / 65535.0) * 10.0
-        }
-        let layerBytes = 510 * 510 * FITSByte_F.bytes
-        let rowBytes = 510 * FITSByte_F.bytes
         
-        var gray = retdta.withUnsafeMutableBytes{ mptr8 in
-            vImage_Buffer(data: mptr8.baseAddress?.advanced(by: layerBytes * 0).bindMemory(to: FITSByte_F.self, capacity: 510 * 510), height: vImagePixelCount(510), width: vImagePixelCount(510), rowBytes: rowBytes)
-        }
- */
         var dataMaxPixel = Pixel_F(data.max()!)
         var dataMinPixel = Pixel_F(data.min()!)
         var meanPixel = Pixel_F(data.mean)
         var stdevPixel = Pixel_F(data.stdev!)
         print("Pixel mean : ", meanPixel, "Pixel Stdev : ", stdevPixel)
-        let histogramcount = 1024
         var histogramBin = [vImagePixelCount](repeating: 0, count: histogramcount)
         let histogramBinPtr = UnsafeMutablePointer<vImagePixelCount>(mutating: histogramBin)
         histogramBin.withUnsafeMutableBufferPointer() { Ptr in
@@ -91,7 +72,6 @@ struct ContentView: View {
                             }
                         }
 
-    
         var histogram_optimized = histogramBin
         var histogramMean = histogramBin.mean
         var histogramStdev = histogramBin.stdev
@@ -149,7 +129,7 @@ struct ContentView: View {
         //var buffer3 = buffer2
         //vImageEqualization_PlanarF(&buffer2, &buffer3, nil, histogramcount, lowerPixelLimt, upperPixelLimit, vImage_Flags(kvImageNoFlags))
         //vImageContrastStretch_PlanarF(&buffer2, &buffer3, nil, histogramcount, lowerPixelLimt, upperPixelLimit, vImage_Flags(kvImageNoFlags))
-        let gamma: Float = 0.5
+        let gamma: Float = 0.8
         let exponential:[Float] = [1, 0, 0]
     
         var buffer3 = buffer
@@ -165,38 +145,80 @@ struct ContentView: View {
                         }
         print(gammahistogram)
         vImageHistogramSpecification_PlanarF(&buffer, &buffer2, nil, gammahistogram, UInt32(histogramcount), 0.0, 1.0, vImage_Flags(kvImageNoFlags))
+        
+        /*for i in 0 ..< kernel2D.count{
+            kernel2D[i] = kernel2D[i] / kernel
+        }*/
+        let kernelwidth = 3
+        let kernelheight = 3
+        var kernelArray = [Float]()
+        var A : Float = 1.0
+        var simgaX: Float = 0.80
+        var sigmaY: Float = 0.80
+        //var Volume = 2.0 * Float.pi * A * simgaX * sigmaY
+        for i in 0 ..< kernelwidth{
+            let xposition = Float(i - kernelwidth / 2)
+            for j in 0 ..< kernelheight{
+            let yposition = Float(j - kernelheight / 2)
+                var xponent = -xposition * xposition / (Float(2.0) * simgaX * simgaX)
+                var yponent = -yposition * yposition / (Float(2.0) * sigmaY * sigmaY)
+                let answer = A * exp (xponent + yponent)
+                kernelArray.append(answer)
+            }
+        }
+        var sum = kernelArray.reduce(0, +)
+        for i in 0 ..< kernelArray.count{
+            kernelArray[i] = kernelArray[i] / sum
+        }
+        print(kernelArray, " " , kernelArray.max())
+        print(buffer2)
+        print(buffer3)
+        vImageConvolve_PlanarF(&buffer2, &buffer3, nil, 0, 0, &kernelArray, UInt32(kernelwidth), UInt32(kernelheight), 0, vImage_Flags(kvImageEdgeExtend))
+        var histogramBin3 = [vImagePixelCount](repeating: 0, count: histogramcount)
+        let histogramBinPtr3 = UnsafeMutablePointer<vImagePixelCount>(mutating: histogramBin3)
+        histogramBin3.withUnsafeMutableBufferPointer() { Ptr in
+                            let error =
+                                vImageHistogramCalculation_PlanarF(&buffer, histogramBinPtr3, UInt32(histogramcount), 0.0, 1.0, vImage_Flags(kvImageNoFlags))
+                                guard error == kvImageNoError else {
+                                fatalError("Error calculating histogram: \(error)")
+                            }
+                        }
+        print(histogramBin3)
+        vImageHistogramSpecification_PlanarF(&buffer, &buffer2, nil, histogramBin3, UInt32(histogramcount), 0.0, 1.0, vImage_Flags(kvImageNoFlags))
 
-        let result2 = (try? buffer2.createCGImage(format: format))!
+ 
+ let result2 = (try? buffer2.createCGImage(format: format))!
 
+        
         //let image = Image(result2!, scale: 1.0, label: Text("Image"))
 
-        return result2
+        return (result2, histogramBin2)
     }
-    func changefile(){
-        path == path2
-        print(path)
+    func histogram () -> [vImagePixelCount]{
+        var originalhistogram = display().1
+        return originalhistogram
     }
 
     var body: some View {
-        HSplitView {
             VStack {
-                Image(display(), scale: 1.0, label: Text("image"))
+                HSplitView{
+                Image(decorative: display().0, scale: 1.0)
                     .resizable()
                     .scaledToFit()
                     .padding()
-                    .frame(minWidth: 800, minHeight: 800)
-            }
-            
-            VStack {
-                Button("File", action: {self.changefile()})
-            }
-            .frame(minWidth: 400)
-            .padding()
-        }
-                
-        }
+                }
+                HStack{
+                    Spacer()
 
+                    Button("Invert", action: {histogram().self})
+                    Button("Zero", action: {histogram().self})
+                    Button("Reset", action: {histogram().self})
+                }
+            }
+
+        }
     }
+
     
 
 
