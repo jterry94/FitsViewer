@@ -30,7 +30,7 @@ struct ContentView: View {
     
     func read() -> ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat){
         var threeData: ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat)?
-        var path = URL(string: path7)!
+        var path = URL(string: path3)!
         var read_data = try! FitsFile.read(contentsOf: path)
         let prime = read_data?.prime
         print(prime)
@@ -41,21 +41,29 @@ struct ContentView: View {
         }
         return threeData!
     }
+    func read2() -> PrimaryHDU{
+        var path = URL(string: path3)!
+        var read_data = try! FitsFile.read(contentsOf: path)
+        let prime = read_data!.prime
+        return prime
+    }
     func display() -> (CGImage, [vImagePixelCount]){
         let threedata = read()
         var data = threedata.0
         //target data
-        var retdta = threedata.0
+        var redta = threedata.0
         //Buffer from FITS File
         var buffer = threedata.1
         //Grayscale format from FITS file
         let format = threedata.2
+        let prime = read2()
         //destination buffer
         var buffer2 = buffer
         var buffer4 = buffer
+        var buffer5 = buffer
 
         var dataMin = data.min()// data type FITSByte_F
-        var dataAvg = data.mean
+        //var dataAvg = data.mean
         
         var dataMaxPixel = Pixel_F(data.max()!)
         var dataMinPixel = Pixel_F(data.min()!)
@@ -185,9 +193,39 @@ struct ContentView: View {
                         }
         print(histogramBin3)
         vImageHistogramSpecification_PlanarF(&buffer, &buffer2, nil, histogramBin3, UInt32(histogramcount), 0.0, 1.0, vImage_Flags(kvImageNoFlags))
-
+/*
+        let pointerRet = UnsafeRawPointer(buffer3.data) //(UnsafeMutableRawPoint?)
+       // let floatpointer = UnsafeRawPointer(pointerRet)
+                                  //.bindMemory(to: UInt64.self, capacity: 1)
+        let firstByte = pointerRet!.load(as: <Float.self>)
+        for i in 0 ..< 6 {
+            print(pointerRet[i])
+        }
+ */
  
- let result2 = (try? buffer2.createCGImage(format: format))!
+ //let rETdata = Data(bytes: raw, count: Int(buffer3.width * buffer3.height))
+        //var dataAvg = Float(0)
+        //var count2 = rETdata.count
+        /*for i in 0 ..< count2 {
+            dataAvg += retdata[i]
+        }
+        print(dataAvg)
+        
+        var bendValue = Float(0.0)
+        
+        if dataAvg * 2.0 > 1.0 {
+            bendValue = (1.0 - dataAvg)/2 + dataAvg
+        }
+        else
+        {
+            bendValue = 1.5 * dataAvg
+        }
+        for i in 0 ..< retdata.count{
+            retdata[i] = (dataAvg * (retdata[i] / (data[i] + bendValue)) + 100.0 / 65535.0) * 10.0
+        }
+ */
+
+ let result2 = (try? buffer3.createCGImage(format: format))!
 
         
         //let image = Image(result2!, scale: 1.0, label: Text("Image"))
