@@ -13,19 +13,19 @@ import Combine
 
 class fitsViewer: ObservableObject {
     let histogramcount = 1024
-    var path = "file:///Users/anthonylim/Downloads/2020-12-03_19;56;17.fits"
+    var path = "file:///Users/jterry/Documents/FITSImages/2020-12-03_19;56;17.fits"
     let path1 = "file:///Users/anthonylim/Downloads/2020-12-03_19;56;17.fits"
     let path2 = "file:///Users/anthonylim/Downloads/n5194.fits"
     let path3 = "file:///Users/anthonylim/Downloads/HIP115691-ID14333-OC148763-GR7975-LUM.fit"
     let path4 = "file:///Users/anthonylim/Downloads/JtIMAGE_009.fits"
-    let path5 = "file:///Users/anthonylim/Downloads/2020-12-03_19_16_43.fits"
-    let path6 = "file:///Users/anthonylim/Downloads/moon_BIN_1x1_0.0010s_002.fits"
+    let path5 = "file:///Users/jterry/Documents/FITSImages/2020-12-03_19_16_43.fits"
+    let path6 = "file:///Users/jterry/Documents/FITSImages/moon_BIN_1x1_0.0010s_002.fits"
     let path7 = "file:///Users/anthonylim/Downloads/NGC4438-104275-LUM.fit"
     let path8 = "file:///Users/anthonylim/Downloads/M66-ID10979-OC144423-GR4135-LUM2.fit"
     let path9 = "file:///Users/anthonylim/Downloads/NGC6960-ID14567-OC148925-GR8123-LUM.fit"
     func read() -> ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat){
         var threeData: ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat)?
-        var path = URL(string: path)!
+        var path = URL(string: path5)!
         var read_data = try! FitsFile.read(contentsOf: path)
         let prime = read_data?.prime
         print(prime)

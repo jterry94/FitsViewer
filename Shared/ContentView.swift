@@ -14,23 +14,25 @@ import Combine
 
 struct ContentView: View {
 
-    
+   
 
     var path = "file:///Users/anthonylim/Downloads/2020-12-03_19;56;17.fits"
     let path1 = "file:///Users/anthonylim/Downloads/2020-12-03_19;56;17.fits"
     let path2 = "file:///Users/anthonylim/Downloads/n5194.fits"
     let path3 = "file:///Users/anthonylim/Downloads/HIP115691-ID14333-OC148763-GR7975-LUM.fit"
     let path4 = "file:///Users/anthonylim/Downloads/JtIMAGE_009.fits"
-    let path5 = "file:///Users/anthonylim/Downloads/2020-12-03_19_16_43.fits"
-    let path6 = "file:///Users/anthonylim/Downloads/moon_BIN_1x1_0.0010s_002.fits"
-    let path7 = "file:///Users/anthonylim/Downloads/NGC4438-104275-LUM.fit"
+    let path5 = "file:///Users/jterry/Documents/FITSImages/2020-12-03_19_16_43.fits"
+    let path6 = "file:///Users/jterry/Downloads/moon_BIN_1x1_0.0010s_002.fits"
+    let path7 = "file:///Users/jterry/Documents/FITSImages/NGC4438-104275-LUM.fit"
     let path8 = "file:///Users/anthonylim/Downloads/M66-ID10979-OC144423-GR4135-LUM2.fit"
     let path9 = "file:///Users/anthonylim/Downloads/NGC6960-ID14567-OC148925-GR8123-LUM.fit"
     let histogramcount = 1024
     
+    @State var called = 0
+    
     func read() -> ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat){
         var threeData: ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat)?
-        var path = URL(string: path3)!
+        var path = URL(string: path6)!
         var read_data = try! FitsFile.read(contentsOf: path)
         let prime = read_data?.prime
         print(prime)
@@ -42,7 +44,7 @@ struct ContentView: View {
         return threeData!
     }
     func read2() -> PrimaryHDU{
-        var path = URL(string: path3)!
+        var path = URL(string: path6)!
         var read_data = try! FitsFile.read(contentsOf: path)
         let prime = read_data!.prime
         return prime
@@ -193,6 +195,11 @@ struct ContentView: View {
                         }
         print(histogramBin3)
         vImageHistogramSpecification_PlanarF(&buffer, &buffer2, nil, histogramBin3, UInt32(histogramcount), 0.0, 1.0, vImage_Flags(kvImageNoFlags))
+        
+        var PixelData = (buffer3.data.toArray(to: Float.self, capacity: Int(buffer3.width*buffer3.height)))
+        
+        print(PixelData.max()!)
+        
 /*
         let pointerRet = UnsafeRawPointer(buffer3.data) //(UnsafeMutableRawPoint?)
        // let floatpointer = UnsafeRawPointer(pointerRet)
@@ -226,12 +233,21 @@ struct ContentView: View {
  */
 
  let result2 = (try? buffer3.createCGImage(format: format))!
+        
+        
+        print("called")
+        
+        
 
         
         //let image = Image(result2!, scale: 1.0, label: Text("Image"))
 
         return (result2, histogramBin2)
     }
+    
+    
+    
+    
     func histogram () -> [vImagePixelCount]{
         var originalhistogram = display().1
         return originalhistogram
@@ -239,11 +255,13 @@ struct ContentView: View {
 
     var body: some View {
             VStack {
-                HSplitView{
-                Image(decorative: display().0, scale: 1.0)
-                    .resizable()
-                    .scaledToFit()
-                    .padding()
+                ScrollView([.horizontal, .vertical]){
+                    HSplitView{
+                    Image(decorative: display().0, scale: 1.0)
+                        //.resizable()
+                       // .scaledToFit()
+                        .padding()
+                    }
                 }
                 HStack{
                     Spacer()
@@ -260,3 +278,9 @@ struct ContentView: View {
     
 
 
+extension UnsafeMutableRawPointer {
+    func toArray<T>(to type: T.Type, capacity count: Int) -> [T]{
+        let pointer = bindMemory(to: type, capacity: count)
+        return Array(UnsafeBufferPointer(start: pointer, count: count))
+    }
+}
