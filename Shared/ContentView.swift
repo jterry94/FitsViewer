@@ -14,35 +14,6 @@ import Combine
 import UniformTypeIdentifiers
 
 struct ContentView: View {
-    
-    
-    var path01 = "file:///Users/jterry/Downloads/M57v2_BIN_1x1_60s_001.fits"
-    let path1 = "file:///Users/anthonylim/Downloads/2020-12-03_19;56;17.fits"
-    let path2 = "file:///Users/jterry/Downloads/n5194.fits"
-    let path3 = "file:///Users/anthonylim/Downloads/HIP115691-ID14333-OC148763-GR7975-LUM.fit"
-    let path4 = "file:///Users/jterry/Downloads/JtIMAGE_009.fits"
-    let path5 = "file:///Users/jterry/Downloads/2020-12-03_19_16_43.fits"
-    let path6 = "file:///Users/jterry/Downloads/moon_BIN_1x1_0.0010s_002.fits"
-    let path7 = "file:///Users/jterry/Downloads/NGC4438-104275-LUM.fit"
-    let path8 = "file:///Users/anthonylim/Downloads/M66-ID10979-OC144423-GR4135-LUM2.fit"
-    let path9 = "file:///Users/anthonylim/Downloads/NGC6960-ID14567-OC148925-GR8123-LUM.fit"
-    let path0 = "file:///Users/jterry/Downloads/globular.fits"
-  //  let path02 = "file:///Users/jterry/Downloads/m13_050414_14i14m_L.FIT"
-    let path03 = "file:///Users/jterry/Downloads/HorseHead.fits"
-    let path04 = "file:///Users/jterry/Downloads/m101_050511_12i60m_L.FIT"
-    let path05 = "file:///Users/jterry/Downloads/m104_050406_12i60mF_L.FIT"
-    let path06 = "file:///Users/jterry/Downloads/C2020Y3-ID14674-OC149038-GR8225-LUM.fit"
-    let path07 = "file:///Users/jterry/Downloads/CRAB-NEBULA-ID09031-OC139256-GR9712-LUM2.fit"
-    let path08 = "file:///Users/jterry/Downloads/ROSETTENEBULA-ID01992-OC106272-GR1166-LUM.fit"
-    let path09 = "file:///Users/jterry/Downloads/NGC2438-104402-LUM.fit"
-    let path10 = "file:///Users/jterry/Downloads/M66-ID10979-OC144423-GR4135-LUM2.fit"
-    let path00 = "file:///Users/jterry/Downloads/ngc4038_050306_9i45mF_L.FIT"
-    let path11 = "file:///Users/jterry/Downloads/NGC4569-ID14657-OC149080-GR8267-LUM.fit"
-    let path12 = "file:///Users/jterry/Downloads/M5-ID14690-OC149088-GR8275-LUM.fit"
-    let path13 = "file:///Users/jterry/Downloads/Calibrated-T11-dougggg-M101-20160316-034553-Luminance-BIN1-W-240-001.fit"
-    let path14 = "file:///Users/jterry/Downloads/Calibrated-T16-dougggg-M33-20151110-233820-Luminance-BIN1-W-120-001.fit"
-    let path15 = "file:///Users/jterry/Downloads/Calibrated-T21-dougggg-M51-20160403-020102-Luminance-BIN1-W-240-001.fit"
-    
 
     let histogramcount = 1024
     
@@ -52,25 +23,25 @@ struct ContentView: View {
     @State var processedImage: Image?
     @State var threedata: ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat)?
     
-    func read() -> ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat){
-        var threeData: ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat)?
-        var path = URL(string: path15)!
-        var read_data = try! FitsFile.read(contentsOf: path)
-        let prime = read_data?.prime
-       // print(prime)
-        prime?.v_complete(onError: {_ in
-            print("CGImage creation error")
-        }) { result in
-            threeData = result
-        }
-        return threeData!
-    }
-    func read2() -> PrimaryHDU{
-        var path = URL(string: path7)!
-        var read_data = try! FitsFile.read(contentsOf: path)
-        let prime = read_data!.prime
-        return prime
-    }
+//    func read() -> ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat){
+//        var threeData: ([FITSByte_F],vImage_Buffer,vImage_CGImageFormat)?
+//        var path = URL(string: path15)!
+//        var read_data = try! FitsFile.read(contentsOf: path)
+//        let prime = read_data?.prime
+//       // print(prime)
+//        prime?.v_complete(onError: {_ in
+//            print("CGImage creation error")
+//        }) { result in
+//            threeData = result
+//        }
+//        return threeData!
+//    }
+//    func read2() -> PrimaryHDU{
+//        var path = URL(string: path7)!
+//        var read_data = try! FitsFile.read(contentsOf: path)
+//        let prime = read_data!.prime
+//        return prime
+//    }
     func display() -> (CGImage, [vImagePixelCount]){
         //let threedata = read()
         var data = threedata!.0
@@ -80,7 +51,7 @@ struct ContentView: View {
         var buffer = threedata!.1
         //Grayscale format from FITS file
         let format = threedata!.2
-        let prime = read2()
+   //     let prime = read2()
         //destination buffer
         var buffer2 = buffer
         var buffer4 = buffer
@@ -356,109 +327,15 @@ struct ContentView: View {
         
         
         processedImage = Image(pixelCGImage!, scale: 3.5, label: Text("Image"))
+        
+        let result2 = (try? buffer.createCGImage(format: format))!
+               
+        rawImage = Image(result2, scale: 3.5, label: Text("Image"))
 
         //return (result2, histogramBin2)
         
         return( pixelCGImage!, histogramBin2)
     }
-    
-    
-    func displayRaw() -> (CGImage, [vImagePixelCount]){
-      //  let threedata = read()
-        var data = threedata!.0
-        //target data
-        var redta = threedata!.0
-        //Buffer from FITS File
-        var buffer = threedata!.1
-        //Grayscale format from FITS file
-        let format = threedata!.2
-        let prime = read2()
-        //destination buffer
-        var buffer2 = buffer
-        var buffer4 = buffer
-        var buffer5 = buffer
-
-        var dataMin = data.min()// data type FITSByte_F
-        //var dataAvg = data.mean
-        
-        var dataMaxPixel = Pixel_F(data.max()!)
-        var dataMinPixel = Pixel_F(data.min()!)
-        var meanPixel = Pixel_F(data.mean)
-        var stdevPixel = Pixel_F(data.stdev!)
-        print("Pixel mean : ", meanPixel, "Pixel Stdev : ", stdevPixel)
-        var histogramBin = [vImagePixelCount](repeating: 0, count: histogramcount)
-        let histogramBinPtr = UnsafeMutablePointer<vImagePixelCount>(mutating: histogramBin)
-        histogramBin.withUnsafeMutableBufferPointer() { Ptr in
-                            let error =
-                                vImageHistogramCalculation_PlanarF(&buffer, histogramBinPtr, UInt32(histogramcount), dataMinPixel, dataMaxPixel, vImage_Flags(kvImageNoFlags))
-                                guard error == kvImageNoError else {
-                                fatalError("Error calculating histogram: \(error)")
-                            }
-                        }
-
-        var histogram_optimized = histogramBin
-        var histogramMean = histogramBin.mean
-        var histogramStdev = histogramBin.stdev
-        var histogramStdevp = histogramBin.stdevp
-        var histogramAllcount = histogramBin.reduce(0,+)
-        //print("Mean : ", histogramMean, " Stdev : ", histogramStdev, " Stdevp : ", histogramStdevp, " Total : ", histogramAllcount)
-        var histogramMedian = Double( histogramAllcount / 2)
-        var meaningfulPixelvalue = 0
-        var meaningfulPixelvalue2 = 0
-        histogramBin[0] = 0
-        for i in 0 ..< histogramcount{
-            if histogramBin[i] < 5 {
-                histogram_optimized[i] = 0
-            }
-            else{
-                histogram_optimized[i] = histogram_optimized[i]
-                meaningfulPixelvalue = i
-            }
-            
-        }
-        for i in 10 ..< histogramcount{
-            if histogram_optimized[i] == 0{
-                meaningfulPixelvalue2 = i
-            }
-            else{
-                break
-            }
-        }
-  /*      print(histogram_optimized, meaningfulPixelvalue, meaningfulPixelvalue2)
-        var upperPixelLimit = Pixel_F(Double(meaningfulPixelvalue) / Double(histogramcount))
-        var lowerPixelLimt = Pixel_F(Double(meaningfulPixelvalue2) / Double(histogramcount))
-        print("Lower Pixel Limit : ", lowerPixelLimt , " Upper Pixel Limit : ", upperPixelLimit)
-        var optimized_histogram = histogramBin
-        let optimized_histogramBinPtr = UnsafeMutablePointer<vImagePixelCount>(mutating: optimized_histogram)
-        histogramBin.withUnsafeMutableBufferPointer() { Ptr in
-                            let error =
-                                vImageHistogramCalculation_PlanarF(&buffer, optimized_histogramBinPtr, UInt32(histogramcount), lowerPixelLimt, upperPixelLimit, vImage_Flags(kvImageNoFlags))
-                                guard error == kvImageNoError else {
-                                fatalError("Error calculating histogram: \(error)")
-                            }
-                        }
-        print(optimized_histogram)
- 
- */
-        
-
-
- let result2 = (try? buffer.createCGImage(format: format))!
-        
-        
-        print("called")
-        
-        
-
-        
-        rawImage = Image(result2, scale: 3.5, label: Text("Image"))
-
-        return (result2, histogramBin)
-        
-        //return( pixelCGImage!, histogramBin2)
-    }
-    
-    
     
     
     func histogram () -> [vImagePixelCount]{
@@ -537,7 +414,7 @@ struct ContentView: View {
                         }) { result in
                             threedata = result
                             let _ = self.display()
-                            let _ = self.displayRaw()
+                           // let _ = self.displayRaw()
                         }
                         
                             
