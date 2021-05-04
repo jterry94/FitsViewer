@@ -412,9 +412,10 @@ struct ContentView: View {
                         prime.v_complete(onError: {_ in
                             print("CGImage creation error")
                         }) { result in
+                            
                             threedata = result
                             let _ = self.display()
-                           // let _ = self.displayRaw()
+                           
                         }
                         
                             
